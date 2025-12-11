@@ -3,11 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🗺️ 地圖圖釘測試版 - 僅顯示位置</title>
+    <title>🗺️ 地圖圖釘測試版 - 本地資源</title>
     
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/SJPMeR/KoDcewE9jE="
-          crossorigin=""/>
+    <link rel="stylesheet" href="leaflet/leaflet.css"/>
 
     <style>
         * {
@@ -23,7 +21,7 @@
 
         /* 確保地圖容器佔滿整個瀏覽器視窗 */
         #map {
-            height: 100vh; /* 100% Viewport Height */
+            height: 100vh;
             width: 100vw; 
         }
 
@@ -33,7 +31,7 @@
             color: #555;
         }
         .test-info h4 {
-            color: #d9534f; /* 使用紅色突出測試點 */
+            color: #d9534f;
             margin-top: 0;
             margin-bottom: 5px;
         }
@@ -43,9 +41,7 @@
 
     <div id="map"></div>
 
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-            integrity="sha256-20n6aR26920a1qYfSA+bXFijL+sjwLg2U4QzX42T4Bw="
-            crossorigin=""></script>
+    <script src="leaflet/leaflet.js"></script>
 
     <script>
         // =======================================================
@@ -90,7 +86,7 @@
                 });
         });
 
-        // 5. [加分功能] 調整地圖視角，確保所有圖釘都在視野內
+        // 5. 調整地圖視角，確保所有圖釘都在視野內
         var latLngs = locations.map(function(loc) {
             return [loc.lat, loc.lng];
         });
