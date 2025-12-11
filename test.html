@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌎 全球即時影像地圖專題 - 高中資訊課</title>
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/SJPMeR/KoDcewE9jE="
+          crossorigin=""/>
+
+    <style>
+        /* 移除瀏覽器預設的邊界和內邊距 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            overflow: hidden; /* 防止滾動條出現 */
+            background-color: #f4f4f4;
+        }
+
+        /* 確保地圖容器佔滿整個瀏覽器視窗 */
+        #map {
+            height: 100vh; /* 100% Viewport Height */
+            width: 100vw; 
+            position: relative;
+        }
+
+        /* 彈出視窗內的影像容器樣式 (讓內容居中) */
+        .leaflet-popup-content-wrapper div {
+            padding: 5px;
+        }
+
+        /* 可選：美化彈出視窗的標題 */
+        .leaflet-popup-content h4 {
+            font-size: 16px;
+            color: #007bff;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="map"></div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+            integrity="sha256-20n6aR26920a1qYfSA+bXFijL+sjwLg2U4QzX42T4Bw="
+            crossorigin=""></script>
+
+    <script>
+        // =======================================================
+        // JavaScript 邏輯開始 (由 Leaflet 驅動)
+        // =======================================================
+
+        // 1. 初始化地圖
+        // 設定地圖的中心點為全球 (北緯 30, 東經 0)，縮放等級 2
+        var map = L.map('map').setView([30, 0], 2); 
+
+        // 2. 加入 OpenStreetMap 圖層作為地圖底圖
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap 貢獻者' 
+        }).addTo(map);
+
+        // 3. 定義所有地點的資料
+        // 所有即時影像連結均已根據您的提供進行更新和嵌入
+        var locations = [
+            // 韓國地區
+            {
+                name: "🇰🇷 韓國 弘大",
+                lat: 37.5574,
+                lng: 126.9246,
+                videoContent: '<iframe width="300" height="200" src="https://www.youtube.com/embed/S1A49C6V-dg" title="韓國弘大即時影像" frameborder="0" allow="autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>'
+            },
+            // 日本地區
+            {
+                name: "🇯🇵 日本 歌舞伎町",
+                lat: 35.6938,
+                lng: 139.7036,
+                videoContent: '<iframe width="300" height="200" src="https://www.youtube.com/embed/gFRtAAmiFbE" title="日本歌舞伎町即時影像" frameborder="0" allow="autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>'
+            },
+            {
+                name: "🇯🇵 日本 札幌",
+                lat: 43.0621,
+                lng: 141.3544,
+                videoContent: '<iframe width="300" height="200" src="https://www.youtube.com/embed/CF1vS8DdBIk" title="日本札幌即時影像" frameborder="0" allow="autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>'
+            },
+            // 台灣地區
+            {
+                name: "🇹🇼 台灣 台東",
+                lat: 22.7937,
+                lng: 121.0560,
+                videoContent: '<iframe width="300" height="200" src="https://www.youtube.com/embed/UCG1aXVO8H8" title="台灣台東即時影像" frameborder="0" allow="autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>'
+            },
+            // 歐洲地區
+            {
+                name: "🇮🇹 義大利 威尼斯",
+                lat: 45.4408,
+                lng: 12.3155,
+                videoContent: '<iframe width="300" height="200" src="https://www.youtube.com/embed/WjOGhNDX51M" title="義大利威尼斯即時影像" frameborder="0" allow="autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>'
+            },
+            {
+                name: "🇨🇭 瑞士 巴塞爾",
+                lat: 47.5596,
+                lng: 7.5886,
+                videoContent: '<iframe width="300" height="200" src="https://www.youtube.com/embed/jtLh8BdmHUU" title="瑞士巴塞爾即時影像" frameborder="0" allow="autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>'
+            },
+            {
+                name: "🇫🇮 芬蘭 羅瓦涅米",
+                lat: 66.5039,
+                lng: 25.7294,
+                videoContent: '<iframe width="300" height="200" src="https://www.youtube.com/embed/Cp4RRAEgpeU" title="芬蘭羅瓦涅米即時影像" frameborder="0" allow="autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>'
+            },
+            // 美洲地區
+            {
+                name: "🇺🇸 美國 傑克遜",
+                lat: 43.4799,
+                lng: -110.7628,
+                videoContent: '<iframe width="300" height="200" src="https://www.youtube.com/embed/1EiC9bvVGnk" title="美國傑克遜即時影像" frameborder="0" allow="autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>'
+            }
+        ];
+
+        // 4. 放置圖釘並綁定彈出視窗
+        locations.forEach(function(location) {
+            var popupContent = `
+                <div style="text-align: center;">
+                    <h4 style="margin-top: 0;">${location.name}</h4>
+                    ${location.videoContent}
+                </div>
+            `;
+
+            L.marker([location.lat, location.lng])
+                .addTo(map)
+                .bindPopup(popupContent, {
+                    maxWidth: 320 
+                });
+        });
+
+        // 5. 優化：關閉彈出視窗時停止影片播放
+        map.on('popupclose', function(e) {
+            var contentDiv = e.popup.getElement(); 
+            var iframes = contentDiv.querySelectorAll('iframe');
+            
+            iframes.forEach(function(iframe) {
+                // 移除 iframe 元素，強制停止串流
+                iframe.remove(); 
+            });
+        });
+
+        // 6. [加分功能] 調整地圖視角，讓所有圖釘都在視野內
+        // 創建一個經緯度點的陣列
+        var latLngs = locations.map(function(loc) {
+            return [loc.lat, loc.lng];
+        });
+        // 將地圖縮放到涵蓋所有點的最小範圍
+        var bounds = L.latLngBounds(latLngs);
+        map.fitBounds(bounds, { padding: [50, 50] }); // 設置一些邊距
+        
+    </script>
+    
+</body>
+</html>
