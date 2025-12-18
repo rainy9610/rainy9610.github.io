@@ -8,13 +8,11 @@
     <link rel="stylesheet" href="leaflet.css" />
 
     <style>
-        /* 重置樣式 */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         html, body { height: 100%; width: 100%; font-family: "Microsoft JhengHei", "微軟正黑體", sans-serif; }
 
-        /* 上方區塊：藍天背景 */
         #sky-header {
-            height: 60vh; /* 高度佔 60% 視窗 */
+            height: 60vh;
             background: linear-gradient(to bottom, #4FA4E4 0%, #CAE5F7 100%);
             display: flex;
             flex-direction: column;
@@ -27,39 +25,38 @@
         #sky-header h1 { font-size: 2.5rem; margin-bottom: 15px; }
         #sky-header p { font-size: 1.1rem; }
 
-        /* 下方區塊：地圖容器 */
         #map-container {
-            height: 100vh; /* 地圖佔一個完整的視窗高度 */
+            height: 100vh;
             width: 100%;
-            border-top: 5px solid #578F59; /* 綠色模擬地面 */
+            border-top: 5px solid #578F59;
         }
 
         #map { height: 100%; width: 100%; }
 
-        /* 彈出視窗樣式調整 */
+        /* --- 彈出視窗強制寬度修正 --- */
         .leaflet-popup-content-wrapper {
             border-radius: 12px;
             padding: 5px;
         }
+        
         .leaflet-popup-content {
-            margin: 10px;
+            /* 強制設定寬度，!important 確保覆蓋 Leaflet 預設值 */
+            width: 450px !important; 
+            min-width: 450px !important; 
+            margin: 15px !important;
             text-align: center;
         }
+
         .leaflet-popup-content h4 {
             margin-bottom: 10px;
             font-size: 18px;
             color: #333;
         }
 
-        /* 這是針對 Leaflet 彈出框內容的強制修正 */
-        .leaflet-popup-content {
-            width: 450px !important; /* 強制寬度為 450 */
-            margin: 15px !important; /* 增加邊距，讓標題跟影片不會貼著邊緣 */
-        }
-
-        /* 確保影片本身不會超出框框 */
         iframe {
             max-width: 100%;
+            border-radius: 8px;
+            display: block;
         }
     </style>
 </head>
@@ -75,7 +72,6 @@
     </div>
     
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
-
     <script>
         // 1. 初始化地圖
         var map = L.map('map').setView([20, 0], 2); 
@@ -86,49 +82,23 @@
             attribution: '© OpenStreetMap 貢獻者' 
         }).addTo(map);
 
-        // 3. 定義地點資料 (名稱已改為繁體中文，影片改為 450x300)
+        // 3. 地點資料
         var locations = [
-            {
-                name: "🇹🇼 台灣 台東", lat: 22.7937, lng: 121.0560,
-                video: "UCG1aXVO8H8"
-            },
-            {
-                name: "🇫🇮 芬蘭 羅瓦涅米 (聖誕老人村)", lat: 66.5039, lng: 25.7294,
-                video: "Cp4RRAEgpeU"
-            },
-            {
-                name: "🇨🇭 瑞士 巴塞爾", lat: 47.5596, lng: 7.5886,
-                video: "jtLh8BdmHUU"
-            },
-            {
-                name: "🇮🇹 義大利 威尼斯", lat: 45.4408, lng: 12.3155,
-                video: "WjOGhNDX51M"
-            },
-            {
-                name: "🇺🇸 美國 傑克遜 (懷俄明州)", lat: 43.4799, lng: -110.7628,
-                video: "1EiC9bvVGnk"
-            },
-            {
-                name: "🇯🇵 日本 札幌 (北海道)", lat: 43.0621, lng: 141.3544,
-                video: "CF1vS8DdBIk"
-            },
-            {
-                name: "🇯🇵 日本 歌舞伎町 (東京)", lat: 35.6938, lng: 139.7036,
-                video: "gFRtAAmiFbE"
-            },
-            {
-                name: "🇰🇷 韓國 弘大 (首爾)", lat: 37.5574, lng: 126.9246,
-                video: "S1A49C6V-dg"
-            }
+            { name: "🇹🇼 台灣 台東", lat: 22.7937, lng: 121.0560, video: "UCG1aXVO8H8" },
+            { name: "🇫🇮 芬蘭 羅瓦涅米 (聖誕老人村)", lat: 66.5039, lng: 25.7294, video: "Cp4RRAEgpeU" },
+            { name: "🇨🇭 瑞士 巴塞爾", lat: 47.5596, lng: 7.5886, video: "jtLh8BdmHUU" },
+            { name: "🇮🇹 義大利 威尼斯", lat: 45.4408, lng: 12.3155, video: "WjOGhNDX51M" },
+            { name: "🇺🇸 美國 傑克遜 (懷俄明州)", lat: 43.4799, lng: -110.7628, video: "1EiC9bvVGnk" },
+            { name: "🇯🇵 日本 札幌 (北海道)", lat: 43.0621, lng: 141.3544, video: "CF1vS8DdBIk" },
+            { name: "🇯🇵 日本 歌舞伎町 (東京)", lat: 35.6938, lng: 139.7036, video: "gFRtAAmiFbE" },
+            { name: "🇰🇷 韓國 弘大 (首爾)", lat: 37.5574, lng: 126.9246, video: "S1A49C6V-dg" }
         ];
 
         // 4. 放置圖釘
         locations.forEach(function(loc) {
-            // 在 content 的最外層 div 加上 style="width: 450px;" 
-            // 這是強制撐開視窗的最有效方法
             var content = `
-                <div style="width: 450px; text-align: center;">
-                    <h4 style="margin-bottom: 10px; font-size: 18px;">${loc.name}</h4>
+                <div style="width: 450px;">
+                    <h4>${loc.name}</h4>
                     <iframe width="450" height="300" 
                         src="https://www.youtube.com/embed/${loc.video}" 
                         frameborder="0" 
@@ -140,23 +110,21 @@
             L.marker([loc.lat, loc.lng])
                 .addTo(map)
                 .bindPopup(content, {
-                    maxWidth: 500, // 設稍微大一點預留邊距
-                    minWidth: 450, // 強制鎖定最小寬度
-                    autoPan: true  // 點擊時如果視窗太高，地圖會自動位移
+                    maxWidth: 500,
+                    minWidth: 450,
+                    autoPan: true
                 });
         });
 
-        // 5. 關閉視窗時自動停止影片播放
+        // 5. 關閉視窗時停止播放
         map.on('popupclose', function(e) {
             var container = e.popup.getElement();
             var iframe = container.querySelector('iframe');
             if (iframe) { iframe.remove(); }
         });
 
-        // 6. 自動縮放地圖以顯示所有點
+        // 6. 自動縮放
         var bounds = L.latLngBounds(locations.map(l => [l.lat, l.lng]));
         map.fitBounds(bounds, { padding: [50, 50] });
-
-   <script src="leaflet.js"></script>
-</body>
+    </script> </body>
 </html>
