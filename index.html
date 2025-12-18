@@ -51,18 +51,16 @@
             color: #333;
         }
 
-        /* 強制設定彈出視窗的寬度為 450px */
-.leaflet-popup-content {
-    width: 450px !important; /* 強制寬度 */
-    margin: 15px !important; /* 增加邊距讓畫面不擁擠 */
-}
+        /* 這是針對 Leaflet 彈出框內容的強制修正 */
+        .leaflet-popup-content {
+            width: 450px !important; /* 強制寬度為 450 */
+            margin: 15px !important; /* 增加邊距，讓標題跟影片不會貼著邊緣 */
+        }
 
-/* 確保影片本身會填滿容器 */
-iframe {
-    display: block;
-    margin: 0 auto;
-    border-radius: 8px;
-}
+        /* 確保影片本身不會超出框框 */
+        iframe {
+            max-width: 100%;
+        }
     </style>
 </head>
 <body>
@@ -75,7 +73,7 @@ iframe {
     <div id="map-container">
         <div id="map"></div>
     </div>
-
+    
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 
     <script>
@@ -126,21 +124,26 @@ iframe {
 
         // 4. 放置圖釘
         locations.forEach(function(loc) {
-    var content = `
-        <div style="width: 450px;">
-            <h4 style="margin-bottom: 10px; font-size: 20px;">${loc.name}</h4>
-            <iframe width="450" height="300" 
-                src="https://www.youtube.com/embed/${loc.video}" 
-                frameborder="0" allow="autoplay; encrypted-media" allowfullscreen>
-            </iframe>
-        </div>`;
-    
-    L.marker([loc.lat, loc.lng])
-        .addTo(map)
-        .bindPopup(content, {
-            maxWidth: 500,  // 設為比影片寬一點
-            minWidth: 450,  // 強制最小寬度
-            autoPan: true   // 點擊時自動移動地圖確保視窗完整顯示
+            // 在 content 的最外層 div 加上 style="width: 450px;" 
+            // 這是強制撐開視窗的最有效方法
+            var content = `
+                <div style="width: 450px; text-align: center;">
+                    <h4 style="margin-bottom: 10px; font-size: 18px;">${loc.name}</h4>
+                    <iframe width="450" height="300" 
+                        src="https://www.youtube.com/embed/${loc.video}" 
+                        frameborder="0" 
+                        allow="autoplay; encrypted-media; picture-in-picture" 
+                        allowfullscreen>
+                    </iframe>
+                </div>`;
+            
+            L.marker([loc.lat, loc.lng])
+                .addTo(map)
+                .bindPopup(content, {
+                    maxWidth: 500, // 設稍微大一點預留邊距
+                    minWidth: 450, // 強制鎖定最小寬度
+                    autoPan: true  // 點擊時如果視窗太高，地圖會自動位移
+                });
         });
 
         // 5. 關閉視窗時自動停止影片播放
