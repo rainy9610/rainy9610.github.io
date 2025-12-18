@@ -68,58 +68,59 @@
     
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
     <script>
-        // 1. 初始化地圖
-        var map = L.map('map').setView([20, 0], 2); 
+    // 1. 初始化地圖
+    var map = L.map('map').setView([20, 0], 2); 
 
-        // 2. 載入地圖底圖
-        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '© OpenStreetMap 貢獻者' 
-        }).addTo(map);
+    // 2. 【關鍵修正】強制載入網路圖釘圖片，解決圖釘消失問題
+    delete L.Icon.Default.prototype._getIconUrl;
+    L.Icon.Default.mergeOptions({
+        iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css/../images/marker-icon-2x.png',
+        iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css/../images/marker-icon.png',
+        shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css/../images/marker-shadow.png',
+    });
 
-        // 3. 地點資料
-        var locations = [
-            { name: "🇹🇼 台灣 台東", lat: 22.7937, lng: 121.0560, video: "UCG1aXVO8H8" },
-            { name: "🇫🇮 芬蘭 羅瓦涅米 (聖誕老人村)", lat: 66.5039, lng: 25.7294, video: "Cp4RRAEgpeU" },
-            { name: "🇨🇭 瑞士 巴塞爾", lat: 47.5596, lng: 7.5886, video: "jtLh8BdmHUU" },
-            { name: "🇮🇹 義大利 威尼斯", lat: 45.4408, lng: 12.3155, video: "WjOGhNDX51M" },
-            { name: "🇺🇸 美國 傑克遜 (懷俄明州)", lat: 43.4799, lng: -110.7628, video: "1EiC9bvVGnk" },
-            { name: "🇯🇵 日本 札幌 (北海道)", lat: 43.0621, lng: 141.3544, video: "CF1vS8DdBIk" },
-            { name: "🇯🇵 日本 歌舞伎町 (東京)", lat: 35.6938, lng: 139.7036, video: "gFRtAAmiFbE" },
-            { name: "🇰🇷 韓國 弘大 (首爾)", lat: 37.5574, lng: 126.9246, video: "S1A49C6V-dg" }
-        ];
+    // 3. 載入地圖底圖 (修正底圖讀取不到的問題)
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '© OpenStreetMap' 
+    }).addTo(map);
 
-        // 4. 放置圖釘
-        locations.forEach(function(loc) {
-            var content = `
-                <div style="width: 450px;">
-                    <h4>${loc.name}</h4>
-                    <iframe width="450" height="300" 
-                        src="https://www.youtube.com/embed/${loc.video}" 
-                        frameborder="0" 
-                        allow="autoplay; encrypted-media; picture-in-picture" 
-                        allowfullscreen>
-                    </iframe>
-                </div>`;
-            
-            L.marker([loc.lat, loc.lng])
-                .addTo(map)
-                .bindPopup(content, {
-                    maxWidth: 500,
-                    minWidth: 450,
-                    autoPan: true
-                });
-        });
+    // 4. 地點資料 (保持 450x300 比例)
+    var locations = [
+        { name: "🇹🇼 台灣 台東", lat: 22.7937, lng: 121.0560, video: "UCG1aXVO8H8" },
+        { name: "🇫🇮 芬蘭 羅瓦涅米 (聖誕老人村)", lat: 66.5039, lng: 25.7294, video: "Cp4RRAEgpeU" },
+        { name: "🇨🇭 瑞士 巴塞爾", lat: 47.5596, lng: 7.5886, video: "jtLh8BdmHUU" },
+        { name: "🇮🇹 義大利 威尼斯", lat: 45.4408, lng: 12.3155, video: "WjOGhNDX51M" },
+        { name: "🇺🇸 美國 傑克遜 (懷俄明州)", lat: 43.4799, lng: -110.7628, video: "1EiC9bvVGnk" },
+        { name: "🇯🇵 日本 札幌 (北海道)", lat: 43.0621, lng: 141.3544, video: "CF1vS8DdBIk" },
+        { name: "🇯🇵 日本 歌舞伎町 (東京)", lat: 35.6938, lng: 139.7036, video: "gFRtAAmiFbE" },
+        { name: "🇰🇷 韓國 弘大 (首爾)", lat: 37.5574, lng: 126.9246, video: "S1A49C6V-dg" }
+    ];
 
-        // 5. 關閉視窗時停止播放
-        map.on('popupclose', function(e) {
-            var container = e.popup.getElement();
-            var iframe = container.querySelector('iframe');
-            if (iframe) { iframe.remove(); }
-        });
+    // 5. 放置圖釘
+    locations.forEach(function(loc) {
+        var content = `
+            <div style="width: 450px;">
+                <h4 style="margin-bottom: 8px;">${loc.name}</h4>
+                <iframe width="450" height="300" 
+                    src="https://www.youtube.com/embed/${loc.video}" 
+                    frameborder="0" allowfullscreen>
+                </iframe>
+            </div>`;
+        
+        L.marker([loc.lat, loc.lng])
+            .addTo(map)
+            .bindPopup(content, {
+                maxWidth: 500,
+                minWidth: 450
+            });
+    });
 
-        // 6. 自動縮放
-        var bounds = L.latLngBounds(locations.map(l => [l.lat, l.lng]));
-        map.fitBounds(bounds, { padding: [50, 50] });
-    </script> </body>
+    // 6. 讓地圖自動對焦到所有點
+    var bounds = L.latLngBounds(locations.map(l => [l.lat, l.lng]));
+    map.fitBounds(bounds, { padding: [50, 50] });
+
+    // 7. 修正地圖在視窗變動時會變白的問題
+    setTimeout(function(){ map.invalidateSize()}, 500);
+</script></body>
 </html>
