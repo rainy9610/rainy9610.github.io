@@ -8,57 +8,52 @@
     <link rel="stylesheet" href="leaflet.css" />
 
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        html, body { height: 100%; width: 100%; font-family: "Microsoft JhengHei", "微軟正黑體", sans-serif; }
+    /* 1. 基本重置 */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { height: 100%; width: 100%; overflow-x: hidden; }
 
-        #sky-header {
-            height: 60vh;
-            background: linear-gradient(to bottom, #4FA4E4 0%, #CAE5F7 100%);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            color: white;
-            text-shadow: 2px 2px 5px rgba(0,0,0,0.2);
-        }
+    /* 2. 上方藍天區塊 */
+    #sky-header {
+        height: 60vh;
+        background: linear-gradient(to bottom, #4FA4E4 0%, #CAE5F7 100%);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        color: white;
+        text-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+    }
 
-        #sky-header h1 { font-size: 2.5rem; margin-bottom: 15px; }
-        #sky-header p { font-size: 1.1rem; }
+    /* 3. 下方地圖容器：解決空白問題的關鍵 */
+    #map-container {
+        position: relative;
+        height: 800px; /* 強制給予一個固定高度，防止變空白 */
+        width: 100%;
+        border-top: 5px solid #578F59;
+    }
 
-        #map-container {
-            height: 100vh;
-            width: 100%;
-            border-top: 5px solid #578F59;
-        }
+    #map { 
+        height: 100%; 
+        width: 100%; 
+        background-color: #f0f0f0; /* 給予底色確保載入中不全白 */
+    }
 
-        #map { height: 100%; width: 100%; }
+    /* 4. 強制修正彈出視窗太窄的問題 */
+    .leaflet-popup-content {
+        width: 450px !important; /* 強制寬度 450px */
+        margin: 15px !important;
+    }
 
-        /* --- 彈出視窗強制寬度修正 --- */
-        .leaflet-popup-content-wrapper {
-            border-radius: 12px;
-            padding: 5px;
-        }
-        
-        .leaflet-popup-content {
-            /* 強制設定寬度，!important 確保覆蓋 Leaflet 預設值 */
-            width: 450px !important; 
-            min-width: 450px !important; 
-            margin: 15px !important;
-            text-align: center;
-        }
+    .leaflet-popup-content-wrapper {
+        border-radius: 10px;
+        width: 480px !important; /* 包裹層也要夠寬 */
+    }
 
-        .leaflet-popup-content h4 {
-            margin-bottom: 10px;
-            font-size: 18px;
-            color: #333;
-        }
-
-        iframe {
-            max-width: 100%;
-            border-radius: 8px;
-            display: block;
-        }
-    </style>
+    iframe {
+        border-radius: 5px;
+        display: block;
+    }
+</style>
 </head>
 <body>
 
