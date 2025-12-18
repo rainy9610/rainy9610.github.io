@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🌎 藍天下的世界：全球即時影像地圖</title>
     
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
+    <link rel="stylesheet" href="leaflet.css" />
     <style>
         /* 重置基本樣式 */
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -145,7 +145,7 @@
         var bounds = L.latLngBounds(latLngs);
         map.fitBounds(bounds, { padding: [50, 50] });
         
-    </script>
+    <script src="leaflet.js"></script>
     
 </body>
 </html>
