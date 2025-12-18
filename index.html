@@ -1,151 +1,146 @@
-<<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🌎 藍天下的世界：全球即時影像地圖</title>
+    <title>🌎 全球各地即時影像 - 藍天下的地圖</title>
     
     <link rel="stylesheet" href="leaflet.css" />
-    <style>
-        /* 重置基本樣式 */
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        html, body { height: 100%; /* 讓網頁高度至少佔滿視窗 */ }
-        body { font-family: '微軟正黑體', Arial, sans-serif; }
 
-        /* --- 上方藍天區塊樣式 --- */
+    <style>
+        /* 重置樣式 */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { height: 100%; width: 100%; font-family: "Microsoft JhengHei", "微軟正黑體", sans-serif; }
+
+        /* 上方區塊：藍天背景 */
         #sky-header {
-            /* 設定高度為視窗高度的 90%，留一點空間暗示下方有內容 */
-            height: 90vh; 
-            /* 簡單的藍天漸層背景 */
+            height: 60vh; /* 高度佔 60% 視窗 */
             background: linear-gradient(to bottom, #4FA4E4 0%, #CAE5F7 100%);
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             color: white;
-            text-shadow: 1px 1px 4px rgba(0,0,0,0.3);
-            position: relative;
+            text-shadow: 2px 2px 5px rgba(0,0,0,0.2);
         }
 
-        #sky-header h1 {
-            font-size: 3rem;
-            margin-bottom: 20px;
-            text-align: center;
-        }
+        #sky-header h1 { font-size: 2.5rem; margin-bottom: 15px; }
+        #sky-header p { font-size: 1.1rem; }
 
-        #sky-header p {
-            font-size: 1.2rem;
-            animation: bounce 2s infinite; /* 增加一個簡單的跳動動畫吸引注意 */
-        }
-
-        /* 簡單的向下箭頭動畫 */
-        @keyframes bounce {
-            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-            40% { transform: translateY(-10px); }
-            60% { transform: translateY(-5px); }
-        }
-
-        /* --- 下方地圖容器樣式 --- */
+        /* 下方區塊：地圖容器 */
         #map-container {
-            /* 地圖區塊高度設為一個完整的視窗高度，確保瀏覽體驗 */
-            height: 100vh; 
+            height: 100vh; /* 地圖佔一個完整的視窗高度 */
             width: 100%;
-            /* 加一條綠色的邊界線，模擬地面感 */
-            border-top: 8px solid #578F59; 
+            border-top: 5px solid #578F59; /* 綠色模擬地面 */
         }
 
-        /* 地圖本體佔滿容器 */
         #map { height: 100%; width: 100%; }
 
-        /* --- 彈出視窗樣式微調 --- */
-        .leaflet-popup-content-wrapper { border-radius: 8px; }
-        .leaflet-popup-content { margin: 10px; text-align: center; }
-        .leaflet-popup-content h4 { margin-bottom: 10px; color: #333; font-size: 16px; }
-        iframe { max-width: 100%; border-radius: 4px; }
+        /* 彈出視窗樣式調整 */
+        .leaflet-popup-content-wrapper {
+            border-radius: 12px;
+            padding: 5px;
+        }
+        .leaflet-popup-content {
+            margin: 10px;
+            text-align: center;
+        }
+        .leaflet-popup-content h4 {
+            margin-bottom: 10px;
+            font-size: 18px;
+            color: #333;
+        }
     </style>
 </head>
 <body>
 
     <header id="sky-header">
-        <h1>☁️ 藍天下的世界即時影像 ☁️</h1>
-        <p>▼ 請往下捲動探索地圖 ▼</p>
+        <h1>☁️ 全球即時影像地圖 ☁️</h1>
+        <p>探索世界各地的風景，請往下滑動地圖</p>
     </header>
 
     <div id="map-container">
         <div id="map"></div>
     </div>
 
-
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+
     <script>
         // 1. 初始化地圖
-        // 設定中心點稍偏上方，讓第一次捲動下來時視覺比較平衡
-        var map = L.map('map').setView([35, 0], 2); 
+        var map = L.map('map').setView([20, 0], 2); 
 
-        // 2. 加入 OpenStreetMap 圖層
+        // 2. 載入地圖底圖
         L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
             attribution: '© OpenStreetMap 貢獻者' 
         }).addTo(map);
 
-        // 3. 定義所有 8 個地點的資料與 YouTube 嵌入碼
+        // 3. 定義地點資料 (名稱已改為繁體中文，影片改為 450x300)
         var locations = [
             {
-                name: "🇰🇷 韓國 弘大", lat: 37.5574, lng: 126.9246,
-                videoContent: '<iframe width="300" height="200" src="https://www.youtube.com/embed/S1A49C6V-dg" title="韓國弘大即時影像" frameborder="0" allow="autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>'
-            },
-            {
-                name: "🇯🇵 日本 歌舞伎町", lat: 35.6938, lng: 139.7036,
-                videoContent: '<iframe width="300" height="200" src="https://www.youtube.com/embed/gFRtAAmiFbE" title="日本歌舞伎町即時影像" frameborder="0" allow="autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>'
-            },
-            {
-                name: "🇯🇵 日本 札幌", lat: 43.0621, lng: 141.3544,
-                videoContent: '<iframe width="300" height="200" src="https://www.youtube.com/embed/CF1vS8DdBIk" title="日本札幌即時影像" frameborder="0" allow="autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>'
-            },
-            {
                 name: "🇹🇼 台灣 台東", lat: 22.7937, lng: 121.0560,
-                videoContent: '<iframe width="300" height="200" src="https://www.youtube.com/embed/UCG1aXVO8H8" title="台灣台東即時影像" frameborder="0" allow="autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>'
+                video: "UCG1aXVO8H8"
             },
             {
-                name: "🇮🇹 義大利 威尼斯", lat: 45.4408, lng: 12.3155,
-                videoContent: '<iframe width="300" height="200" src="https://www.youtube.com/embed/WjOGhNDX51M" title="義大利威尼斯即時影像" frameborder="0" allow="autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>'
+                name: "🇫🇮 芬蘭 羅瓦涅米 (聖誕老人村)", lat: 66.5039, lng: 25.7294,
+                video: "Cp4RRAEgpeU"
             },
             {
                 name: "🇨🇭 瑞士 巴塞爾", lat: 47.5596, lng: 7.5886,
-                videoContent: '<iframe width="300" height="200" src="https://www.youtube.com/embed/jtLh8BdmHUU" title="瑞士巴塞爾即時影像" frameborder="0" allow="autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>'
+                video: "jtLh8BdmHUU"
             },
             {
-                name: "🇫🇮 芬蘭 羅瓦涅米", lat: 66.5039, lng: 25.7294,
-                videoContent: '<iframe width="300" height="200" src="https://www.youtube.com/embed/Cp4RRAEgpeU" title="芬蘭羅瓦涅米即時影像" frameborder="0" allow="autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>'
+                name: "🇮🇹 義大利 威尼斯", lat: 45.4408, lng: 12.3155,
+                video: "WjOGhNDX51M"
             },
             {
-                name: "🇺🇸 美國 傑克遜", lat: 43.4799, lng: -110.7628,
-                videoContent: '<iframe width="300" height="200" src="https://www.youtube.com/embed/1EiC9bvVGnk" title="美國傑克遜即時影像" frameborder="0" allow="autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>'
+                name: "🇺🇸 美國 傑克遜 (懷俄明州)", lat: 43.4799, lng: -110.7628,
+                video: "1EiC9bvVGnk"
+            },
+            {
+                name: "🇯🇵 日本 札幌 (北海道)", lat: 43.0621, lng: 141.3544,
+                video: "CF1vS8DdBIk"
+            },
+            {
+                name: "🇯🇵 日本 歌舞伎町 (東京)", lat: 35.6938, lng: 139.7036,
+                video: "gFRtAAmiFbE"
+            },
+            {
+                name: "🇰🇷 韓國 弘大 (首爾)", lat: 37.5574, lng: 126.9246,
+                video: "S1A49C6V-dg"
             }
         ];
 
         // 4. 放置圖釘
-        locations.forEach(function(location) {
-            var popupContent = `<h4>${location.name}</h4>${location.videoContent}`;
-            L.marker([location.lat, location.lng])
+        locations.forEach(function(loc) {
+            var content = `
+                <div>
+                    <h4>${loc.name}</h4>
+                    <iframe width="450" height="300" 
+                        src="https://www.youtube.com/embed/${loc.video}" 
+                        frameborder="0" allowfullscreen>
+                    </iframe>
+                </div>`;
+            
+            L.marker([loc.lat, loc.lng])
                 .addTo(map)
-                .bindPopup(popupContent, { maxWidth: 320 });
+                .bindPopup(content, {
+                    maxWidth: 480,
+                    minWidth: 450
+                });
         });
 
-        // 5. 優化：關閉彈出視窗時停止影片播放
+        // 5. 關閉視窗時自動停止影片播放
         map.on('popupclose', function(e) {
-            var contentDiv = e.popup.getElement(); 
-            var iframes = contentDiv.querySelectorAll('iframe');
-            iframes.forEach(function(iframe) { iframe.remove(); });
+            var container = e.popup.getElement();
+            var iframe = container.querySelector('iframe');
+            if (iframe) { iframe.remove(); }
         });
 
-        // 6. [加分功能] 自動調整視角以涵蓋所有圖釘
-        // 這能確保使用者捲動下來時，能一眼看到所有分佈點
-        var latLngs = locations.map(function(loc) { return [loc.lat, loc.lng]; });
-        var bounds = L.latLngBounds(latLngs);
+        // 6. 自動縮放地圖以顯示所有點
+        var bounds = L.latLngBounds(locations.map(l => [l.lat, l.lng]));
         map.fitBounds(bounds, { padding: [50, 50] });
-        
-    <script src="leaflet.js"></script>
-    
+
+   <script src="leaflet.js"></script>
 </body>
 </html>
