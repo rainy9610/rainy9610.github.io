@@ -8,11 +8,11 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
     <style>
-        /* 1. 全域樣式與重置 */
+        /* 1. 基本樣式設定 */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         html, body { height: 100%; width: 100%; overflow-x: hidden; font-family: "Microsoft JhengHei", sans-serif; background-color: #f4f7f6; }
 
-        /* 2. 藍天標題區塊 */
+        /* 2. 上方藍天區塊 */
         #sky-header {
             height: 60vh;
             background: linear-gradient(to bottom, #4FA4E4 0%, #CAE5F7 100%);
@@ -29,7 +29,7 @@
         h1 { font-size: 3rem; margin-bottom: 10px; }
         p { font-size: 1.2rem; opacity: 0.9; }
 
-        /* 隨機傳送按鈕樣式 */
+        /* 隨機傳送按鈕 */
         .btn-random {
             margin-top: 30px;
             padding: 15px 35px;
@@ -49,28 +49,19 @@
             box-shadow: 0 8px 25px rgba(0,0,0,0.3);
         }
 
-        /* 3. 地圖容器修正 (防止空白關鍵) */
+        /* 3. 地圖容器 (高度固定 800px) */
         #map-container {
             position: relative;
             height: 800px;
             width: 100%;
             border-top: 6px solid #578F59;
-            box-shadow: 0 -5px 15px rgba(0,0,0,0.1);
         }
         #map { height: 100%; width: 100%; background-color: #f0f0f0; }
 
-        /* 4. 彈出視窗寬度強制修正 */
+        /* 4. 彈出視窗寬度強制修正 (450px 影片最佳寬度) */
         .leaflet-popup-content { width: 450px !important; margin: 15px !important; }
-        .leaflet-popup-content-wrapper { border-radius: 12px; width: 480px !important; padding: 0; overflow: hidden; }
+        .leaflet-popup-content-wrapper { border-radius: 12px; width: 480px !important; overflow: hidden; }
         
-        /* 5. 呼吸動畫 (讓圖釘閃爍增加動態感) */
-        @keyframes pulse {
-            0% { transform: scale(1); opacity: 0.8; }
-            50% { transform: scale(1.2); opacity: 0.6; }
-            100% { transform: scale(1); opacity: 0.8; }
-        }
-        .leaflet-interactive { animation: pulse 3s infinite ease-in-out; }
-
         iframe { border-radius: 8px; display: block; background: #000; }
     </style>
 </head>
@@ -89,15 +80,23 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
     // 1. 初始化地圖
-    var map = L.map('map').setView([20, 0], 2); 
+    var map = L.map('map').setView([23.5, 121], 5); // 初始視角固定在台灣
 
-    // 2. 載入地圖底圖
+    // 2. 強制載入網路圖釘圖片 (解決 GitHub 路徑錯誤問題)
+    delete L.Icon.Default.prototype._getIconUrl;
+    L.Icon.Default.mergeOptions({
+        iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+        iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+        shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+    });
+
+    // 3. 載入底圖
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19,
-        attribution: '© OpenStreetMap contributors' 
+        attribution: '© OpenStreetMap' 
     }).addTo(map);
 
-    // 3. 整合後的 17 個地點資料
+    // 4. 全球 17 個地點資料
     var locations = [
         { name: "🇹🇼 台中 望高寮夜景", lat: 24.1432, lng: 120.5750, video: "lhXXhDYjFtI", tz: "Asia/Taipei" },
         { name: "🇹🇼 台北 大稻埕碼頭", lat: 25.0569, lng: 121.5065, video: "Ndo_8RuefH4", tz: "Asia/Taipei" },
@@ -105,22 +104,22 @@
         { name: "🇹🇼 台灣 台東", lat: 22.7937, lng: 121.0560, video: "UCG1aXVO8H8", tz: "Asia/Taipei" },
         { name: "🇳🇱 荷蘭 阿姆斯特丹", lat: 52.3731, lng: 4.8926, video: "Gd9d4q6WvUY", tz: "Europe/Amsterdam" },
         { name: "🇦🇺 澳洲 雪梨港", lat: -33.8688, lng: 151.2093, video: "5uZa3-RMFos", tz: "Australia/Sydney" },
-        { name: "🇺🇸 美國 紐奧良 (路易斯安那)", lat: 29.9511, lng: -90.0715, video: "86-7Dr7yeVQ", tz: "America/Chicago" },
+        { name: "🇺🇸 美國 紐奧良", lat: 29.9511, lng: -90.0715, video: "86-7Dr7yeVQ", tz: "America/Chicago" },
         { name: "🇹🇭 泰國 蘇梅島", lat: 9.4673, lng: 100.0610, video: "Fw9hgttWzIg", tz: "Asia/Bangkok" },
         { name: "🇺🇸 美國 紐約 (時報廣場)", lat: 40.7580, lng: -73.9855, video: "rnXIjl_Rzy4", tz: "America/New_York" },
-        { name: "🇫🇮 芬蘭 基爾皮斯耶爾維 (極光)", lat: 69.0494, lng: 20.7891, video: "ccTVAhJU5lg", tz: "Europe/Helsinki" },
-        { name: "🇫🇮 芬蘭 羅瓦涅米 (聖誕村)", lat: 66.5039, lng: 25.7294, video: "Cp4RRAEgpeU", tz: "Europe/Helsinki" },
+        { name: "🇫🇮 芬蘭 基爾皮斯耶爾維", lat: 69.0494, lng: 20.7891, video: "ccTVAhJU5lg", tz: "Europe/Helsinki" },
+        { name: "🇫🇮 芬蘭 羅瓦涅米", lat: 66.5039, lng: 25.7294, video: "Cp4RRAEgpeU", tz: "Europe/Helsinki" },
         { name: "🇨🇭 瑞士 巴塞爾", lat: 47.5596, lng: 7.5886, video: "jtLh8BdmHUU", tz: "Europe/Zurich" },
         { name: "🇮🇹 義大利 威尼斯", lat: 45.4408, lng: 12.3155, video: "WjOGhNDX51M", tz: "Europe/Rome" },
-        { name: "🇺🇸 美國 傑克遜 (懷俄明州)", lat: 43.4799, lng: -110.7628, video: "1EiC9bvVGnk", tz: "America/Denver" },
-        { name: "🇯🇵 日本 札幌 (北海道)", lat: 43.0621, lng: 141.3544, video: "CF1vS8DdBIk", tz: "Asia/Tokyo" },
-        { name: "🇯🇵 日本 歌舞伎町 (東京)", lat: 35.6938, lng: 139.7036, video: "gFRtAAmiFbE", tz: "Asia/Tokyo" },
-        { name: "🇰🇷 韓國 弘大 (首爾)", lat: 37.5574, lng: 126.9246, video: "S1A49C6V-dg", tz: "Asia/Seoul" }
+        { name: "🇺🇸 美國 傑克遜", lat: 43.4799, lng: -110.7628, video: "1EiC9bvVGnk", tz: "America/Denver" },
+        { name: "🇯🇵 日本 札幌", lat: 43.0621, lng: 141.3544, video: "CF1vS8DdBIk", tz: "Asia/Tokyo" },
+        { name: "🇯🇵 日本 歌舞伎町", lat: 35.6938, lng: 139.7036, video: "gFRtAAmiFbE", tz: "Asia/Tokyo" },
+        { name: "🇰🇷 韓國 弘大", lat: 37.5574, lng: 126.9246, video: "S1A49C6V-dg", tz: "Asia/Seoul" }
     ];
 
     var markerList = [];
 
-    // 4. 抓取天氣 API 函數
+    // 5. 抓取天氣 API
     async function getWeatherData(lat, lng) {
         try {
             const response = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current_weather=true`);
@@ -129,9 +128,8 @@
         } catch (error) { return "--"; }
     }
 
-    // 5. 繪製所有地點標記
+    // 6. 放置標記 (使用 L.marker 確保座標精準不游移)
     locations.forEach(async function(loc) {
-        // 抓取即時天氣與時間
         const currentTemp = await getWeatherData(loc.lat, loc.lng);
         var localTime = new Date().toLocaleString("zh-TW", {
             timeZone: loc.tz,
@@ -139,7 +137,7 @@
         });
 
         var content = `
-            <div style="width: 450px; padding: 5px;">
+            <div style="width: 450px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 2px solid #eee; padding-bottom: 8px;">
                     <h4 style="margin: 0; font-size: 18px; color: #333;">${loc.name}</h4>
                     <div style="text-align: right;">
@@ -150,39 +148,29 @@
                 <iframe width="450" height="300" src="https://www.youtube.com/embed/${loc.video}" frameborder="0" allowfullscreen></iframe>
             </div>`;
         
-        // 使用圓點標記 (避免圖片丟失問題)
-        var marker = L.circleMarker([loc.lat, loc.lng], {
-            radius: 11,
-            fillColor: "#ff7800",
-            color: "#fff",
-            weight: 3,
-            fillOpacity: 0.9
-        }).addTo(map).bindPopup(content, { maxWidth: 500, minWidth: 450 });
+        var marker = L.marker([loc.lat, loc.lng])
+            .addTo(map)
+            .bindPopup(content, { maxWidth: 500, minWidth: 450 });
 
         markerList.push(marker);
     });
 
-    // 6. 隨機傳送函數
+    // 7. 隨機傳送函數
     function randomFly() {
         if (markerList.length === 0) return;
         var randomIndex = Math.floor(Math.random() * markerList.length);
         var targetMarker = markerList[randomIndex];
         
-        // 飛行效果
         map.flyTo(targetMarker.getLatLng(), 11, { animate: true, duration: 2.5 });
 
-        // 飛行完成後自動打開 Popup
         map.once('moveend', function() {
             targetMarker.openPopup();
         });
 
-        // 頁面滾動到地圖區
         document.getElementById('map-container').scrollIntoView({ behavior: 'smooth' });
     }
 
-    // 7. 自動對焦全體圖標並修正大小
-    var bounds = L.latLngBounds(locations.map(l => [l.lat, l.lng]));
-    map.fitBounds(bounds, { padding: [50, 50] });
+    // 8. 確保地圖正確顯示
     setTimeout(function(){ map.invalidateSize()}, 1000);
     </script>
 </body>
