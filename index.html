@@ -97,24 +97,32 @@
         { name: "🇰🇷 韓國 弘大 (首爾)", lat: 37.5574, lng: 126.9246, video: "S1A49C6V-dg" }
     ];
 
-    // 5. 放置圖釘
+    // 5. 放置標記 (改用圓點標記，解決圖釘圖片消失問題)
     locations.forEach(function(loc) {
         var content = `
             <div style="width: 450px;">
-                <h4 style="margin-bottom: 8px;">${loc.name}</h4>
+                <h4 style="margin-bottom: 8px; font-size: 18px; border-bottom: 1px solid #ccc; padding-bottom: 5px;">${loc.name}</h4>
                 <iframe width="450" height="300" 
                     src="https://www.youtube.com/embed/${loc.video}" 
                     frameborder="0" allowfullscreen>
                 </iframe>
             </div>`;
-        
-        L.marker([loc.lat, loc.lng])
-            .addTo(map)
-            .bindPopup(content, {
-                maxWidth: 500,
-                minWidth: 450
-            });
+    
+    // 改用 L.circleMarker，這不需要載入任何圖片！
+    L.circleMarker([loc.lat, loc.lng], {
+        radius: 10,         // 圓點大小
+        fillColor: "#ff7800", // 圓點顏色 (橘色較顯眼)
+        color: "#fff",      // 外框顏色
+        weight: 2,          // 外框粗細
+        opacity: 1,
+        fillOpacity: 0.8    // 透明度
+    })
+    .addTo(map)
+    .bindPopup(content, {
+        maxWidth: 500,
+        minWidth: 450
     });
+});
 
     // 6. 讓地圖自動對焦到所有點
     var bounds = L.latLngBounds(locations.map(l => [l.lat, l.lng]));
