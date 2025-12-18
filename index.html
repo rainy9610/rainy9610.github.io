@@ -86,17 +86,65 @@
     }).addTo(map);
 
     // 4. 地點資料 (保持 450x300 比例)
-    var locations = [
-        { name: "🇹🇼 台灣 台東", lat: 22.7937, lng: 121.0560, video: "UCG1aXVO8H8" },
-        { name: "🇫🇮 芬蘭 羅瓦涅米 (聖誕老人村)", lat: 66.5039, lng: 25.7294, video: "Cp4RRAEgpeU" },
-        { name: "🇨🇭 瑞士 巴塞爾", lat: 47.5596, lng: 7.5886, video: "jtLh8BdmHUU" },
-        { name: "🇮🇹 義大利 威尼斯", lat: 45.4408, lng: 12.3155, video: "WjOGhNDX51M" },
-        { name: "🇺🇸 美國 傑克遜 (懷俄明州)", lat: 43.4799, lng: -110.7628, video: "1EiC9bvVGnk" },
-        { name: "🇯🇵 日本 札幌 (北海道)", lat: 43.0621, lng: 141.3544, video: "CF1vS8DdBIk" },
-        { name: "🇯🇵 日本 歌舞伎町 (東京)", lat: 35.6938, lng: 139.7036, video: "gFRtAAmiFbE" },
-        { name: "🇰🇷 韓國 弘大 (首爾)", lat: 37.5574, lng: 126.9246, video: "S1A49C6V-dg" }
-    ];
+    // 1. 地點資料 (移除了手動溫度 temp，改由程式抓取)
+var locations = [
+    { name: "🇹🇼 台灣 台東", lat: 22.7937, lng: 121.0560, video: "UCG1aXVO8H8", tz: "Asia/Taipei" },
+    { name: "🇫🇮 芬蘭 羅瓦涅米", lat: 66.5039, lng: 25.7294, video: "Cp4RRAEgpeU", tz: "Europe/Helsinki" },
+    { name: "🇨🇭 瑞士 巴塞爾", lat: 47.5596, lng: 7.5886, video: "jtLh8BdmHUU", tz: "Europe/Zurich" },
+    { name: "🇮🇹 義大利 威尼斯", lat: 45.4408, lng: 12.3155, video: "WjOGhNDX51M", tz: "Europe/Rome" },
+    { name: "🇺🇸 美國 傑克遜", lat: 43.4799, lng: -110.7628, video: "1EiC9bvVGnk", tz: "America/Denver" },
+    { name: "🇯🇵 日本 札幌", lat: 43.0621, lng: 141.3544, video: "CF1vS8DdBIk", tz: "Asia/Tokyo" },
+    { name: "🇯🇵 日本 歌舞伎町", lat: 35.6938, lng: 139.7036, video: "gFRtAAmiFbE", tz: "Asia/Tokyo" },
+    { name: "🇰🇷 韓國 弘大", lat: 37.5574, lng: 126.9246, video: "S1A49C6V-dg", tz: "Asia/Seoul" }
+];
 
+// 2. 建立一個函數來抓取天氣
+async function getWeatherData(lat, lng) {
+    try {
+        const response = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current_weather=true`);
+        const data = await response.json();
+        return data.current_weather.temperature;
+    } catch (error) {
+        return "--"; // 如果失敗顯示 --
+    }
+}
+
+// 3. 放置標記
+locations.forEach(async function(loc) {
+    // 獲取當地時間
+    var localTime = new Date().toLocaleString("zh-TW", {
+        timeZone: loc.tz,
+        hour: '2-digit', minute: '2-digit', hour12: false
+    });
+
+    // 【全自動關鍵】異步抓取氣溫
+    const currentTemp = await getWeatherData(loc.lat, loc.lng);
+
+    var content = `
+        <div style="width: 450px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; border-bottom: 2px solid #eee; padding-bottom: 5px;">
+                <h4 style="margin: 0; font-size: 18px;">${loc.name}</h4>
+                <div style="text-align: right;">
+                    <span style="background: #333; color: white; padding: 2px 6px; border-radius: 4px; font-size: 12px; margin-right: 5px;">當地時間 ${localTime}</span>
+                    <span style="color: #ff4500; font-weight: bold; font-size: 16px;">🌡️ ${currentTemp}°C</span>
+                </div>
+            </div>
+            <iframe width="450" height="300" 
+                src="https://www.youtube.com/embed/${loc.video}" 
+                frameborder="0" allowfullscreen>
+            </iframe>
+        </div>`;
+    
+    L.circleMarker([loc.lat, loc.lng], {
+        radius: 10,
+        fillColor: "#ff7800",
+        color: "#fff",
+        weight: 2,
+        fillOpacity: 0.8
+    })
+    .addTo(map)
+    .bindPopup(content, { maxWidth: 500, minWidth: 450 });
+});
     // 5. 放置標記 (改用圓點標記，解決圖釘圖片消失問題)
     locations.forEach(function(loc) {
         var content = `
